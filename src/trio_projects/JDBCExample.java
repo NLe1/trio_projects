@@ -34,7 +34,14 @@ public class JDBCExample {
 			"\n 12. See the names of busses that have a capacity between 30 and 40" +
 			"\n 13. See the avg capacity of the busses" + 
 			"\n 14. See the names of people who paid in both cash and credit" + 
-			"\n 15. See list of all busses"
+			"\n 15. See list of all busses" + 
+			"\n 16. Update all cash payment modes to credit" + 
+			"\n 17. Delete route that has Destination San Jose" + 
+			"\n 18. Insert route to Oregon" + 
+			"\n 19. Insert destination into registration table that does not exist in route" + 
+			"\n 20. Add another route that has the same destination (San Francisco) "+ 
+			"\n" 
+
 		);
 	}
 
@@ -64,12 +71,38 @@ public class JDBCExample {
 		} // end try
 	}
 
+	public static void handleMethod2(Connection conn) {
+		Statement stmt = null;
+		ResultSet rs = null;
+		try {
+			stmt = conn.createStatement();
+			rs = stmt.executeQuery("select destination, distance from route where distance < 30");
+
+			//PROMPT
+			System.out.println("Result: ");
+
+			// STEP 5: Process the results
+			while (rs.next()) {
+				System.out.println("Destination: " + rs.getString("destination") + ", distance =" + rs.getString("distance"));
+			}
+
+		} catch (SQLException se) {se.printStackTrace();} 
+			catch (Exception e) {e.printStackTrace();}
+			finally {
+				try {
+					if (stmt != null)
+						stmt.close();
+				} catch (SQLException se2) {
+			} // nothing we can do
+		} // end try
+	}
+
 	public static void handleMethod3(Connection conn) {
 		Statement stmt = null;
 		ResultSet rs = null;
 		try {
 			stmt = conn.createStatement();
-			rs = stmt.executeQuery("select passName from payment where paymode = 'Cash'");
+			rs = stmt.executeQuery("select passName from payment where paymMode = 'Cash'");
 
 			//PROMPT
 			System.out.println("Result: ");
@@ -144,7 +177,7 @@ public class JDBCExample {
 		ResultSet rs = null;
 		try {
 			stmt = conn.createStatement();
-			rs = stmt.executeQuery("select pname, age, destination from registrations inner join passengers on registrations.passid = passengers.pid where age > 30");
+			rs = stmt.executeQuery("select pname, age, destination from registrations left outer join passengers on registrations.passid = passengers.pid where age > 30");
 
 			//PROMPT
 			System.out.println("Result: ");
@@ -380,20 +413,35 @@ public class JDBCExample {
 		} // end try
 	}
 
-	public static void handleMethod2(Connection conn) {
+		public static void handleMethod16(Connection conn) {
 		Statement stmt = null;
-		ResultSet rs = null;
+		int rs = 0;
 		try {
 			stmt = conn.createStatement();
-			rs = stmt.executeQuery("select destination, distance from route where distance < 30");
+			rs = stmt.executeUpdate("update payment set paymode = 'Credit' where paymode = 'Cash'");
 
 			//PROMPT
-			System.out.println("Result: ");
+			System.out.println("Number of rows updated: " + rs);
+		} catch (SQLException se) {se.printStackTrace();} 
+			catch (Exception e) {e.printStackTrace();}
+			finally {
+				try {
+					if (stmt != null)
+						stmt.close();
+				} catch (SQLException se2) {
+			} // nothing we can do
+		} // end try
+	}
 
-			// STEP 5: Process the results
-			while (rs.next()) {
-				System.out.println("Destination: " + rs.getString("destination") + ", distance =" + rs.getString("distance"));
-			}
+		public static void handleMethod17(Connection conn) {
+		Statement stmt = null;
+		int rs = 0;
+		try {
+			stmt = conn.createStatement();
+			rs = stmt.executeUpdate("delete from route where destination = 'San Jose'");
+
+			//PROMPT
+			System.out.println("Number of rows updated: " + rs);
 
 		} catch (SQLException se) {se.printStackTrace();} 
 			catch (Exception e) {e.printStackTrace();}
@@ -406,10 +454,75 @@ public class JDBCExample {
 		} // end try
 	}
 
+		public static void handleMethod18(Connection conn) {
+		Statement stmt = null;
+		int rs = 0;
+		try {
+			stmt = conn.createStatement();
+			rs = stmt.executeUpdate("Insert into route values ('Z', 100, 'Oregon');");
+
+			//PROMPT
+			System.out.println("Number of rows updated: " + rs);
+
+		} catch (SQLException se) {se.printStackTrace();} 
+			catch (Exception e) {e.printStackTrace();}
+			finally {
+				try {
+					if (stmt != null)
+						stmt.close();
+				} catch (SQLException se2) {
+			} // nothing we can do
+		} // end try
+	}
+
+		public static void handleMethod19(Connection conn) {
+		Statement stmt = null;
+		int rs = 0;
+		try {
+			stmt = conn.createStatement();
+			rs = stmt.executeUpdate("insert into registrations values (6, 101, 13, '2011-02-02', 'Gilroy');");
+
+			//PROMPT
+			System.out.println("Number of rows updated: " + rs);
+
+		} catch (SQLException se) {se.printStackTrace();} 
+			catch (Exception e) {e.printStackTrace();}
+			finally {
+				try {
+					if (stmt != null)
+						stmt.close();
+				} catch (SQLException se2) {
+			} // nothing we can do
+		} // end try
+	}
+
+		public static void handleMethod20(Connection conn) {
+		Statement stmt = null;
+		int rs = 0;
+		try {
+			stmt = conn.createStatement();
+			rs = stmt.executeUpdate("insert into route values ('A', 13, 'San Francisco');");
+
+			//PROMPT
+			System.out.println("Number of rows updated: " + rs);
+
+		} catch (SQLException se) {se.printStackTrace();} 
+			catch (Exception e) {e.printStackTrace();}
+			finally {
+				try {
+					if (stmt != null)
+						stmt.close();
+				} catch (SQLException se2) {
+			} // nothing we can do
+		} // end try
+	}
+
+
 	public static void main(String[] args) {
 		Scanner sc = new Scanner(System.in);
 		Connection conn = null;
 		try {
+
 			conn = DriverManager.getConnection(DB_URL, USER, PASS);
 		}catch (Exception e){
 			System.out.println(e);
@@ -462,8 +575,23 @@ public class JDBCExample {
 				case "14":
 					handleMethod14(conn);
 					break;
-				default:
+				case "15":
 					handleMethod15(conn);
+					break;
+				case "16":
+					handleMethod16(conn);
+					break;
+				case "17":
+					handleMethod17(conn);
+					break; 
+				case "18":
+					handleMethod18(conn);
+					break;
+				case "19":
+					handleMethod19(conn);
+					break;
+				default:
+					handleMethod20(conn);
 					break;
 			}
 			printPrompt();
